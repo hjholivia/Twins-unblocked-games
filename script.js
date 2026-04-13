@@ -28,39 +28,63 @@ if (closeButton) {
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// FIX: real resolution for canvas
 canvas.width = 400;
 canvas.height = 600;
 
-let player = {
-  x: 180,
-  y: 550,
-  width: 40,
-  height: 40,
-  speed: 5
-};
-
-let blocks = [];
-let score = 0;
-let gameOver = false;
+let player, blocks, score, gameOver, highScore = 0;
 
 // controls
-let keys = {};
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
+let moveLeft = false;
+let moveRight = false;
 
-// create blocks
+// keyboard
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") moveLeft = true;
+  if (e.key === "ArrowRight") moveRight = true;
+});
+document.addEventListener("keyup", e => {
+  if (e.key === "ArrowLeft") moveLeft = false;
+  if (e.key === "ArrowRight") moveRight = false;
+});
+
+// TOUCH CONTROLS (iPad fix)
+canvas.addEventListener("touchstart", e => {
+  let x = e.touches[0].clientX;
+  if (x < window.innerWidth / 2) moveLeft = true;
+  else moveRight = true;
+});
+
+canvas.addEventListener("touchend", () => {
+  moveLeft = false;
+  moveRight = false;
+});
+
+function startGame() {
+  player = {
+    x: 180,
+    y: 550,
+    width: 40,
+    height: 40,
+    speed: 6
+  };
+
+  blocks = [];
+  score = 0;
+  gameOver = false;
+}
+
 function spawnBlock() {
-  let size = 30 + Math.random() * 30;
+  let size = 20 + Math.random() * 40;
   blocks.push({
     x: Math.random() * (canvas.width - size),
     y: -size,
     width: size,
     height: size,
-    speed: 2 + score / 200
+    speed: 2 + score / 150
   });
 }
 
-// collision check
 function isColliding(a, b) {
   return a.x < b.x + b.width &&
          a.x + a.width > b.x &&
@@ -68,49 +92,55 @@ function isColliding(a, b) {
          a.y + a.height > b.y;
 }
 
-// game loop
 function update() {
-  if (gameOver) return;
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // move player
-  if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
-  if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
+  if (!gameOver) {
 
-  // draw player
-  ctx.fillStyle = "lime";
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+    // movement
+    if (moveLeft && player.x > 0) player.x -= player.speed;
+    if (moveRight && player.x < canvas.width - player.width) player.x += player.speed;
 
-  // spawn blocks
-  if (Math.random() < 0.03) spawnBlock();
+    // player
+    ctx.fillStyle = "lime";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
 
-  // update blocks
-  blocks.forEach((block, i) => {
-    block.y += block.speed;
+    // spawn blocks
+    if (Math.random() < 0.04) spawnBlock();
 
-    ctx.fillStyle = "red";
-    ctx.fillRect(block.x, block.y, block.width, block.height);
+    // blocks
+    blocks.forEach((block, i) => {
+      block.y += block.speed;
 
-    // collision
-    if (isColliding(player, block)) {
-      gameOver = true;
-      alert("Game Over! Score: " + score);
-      location.reload();
-    }
+      ctx.fillStyle = "red";
+      ctx.fillRect(block.x, block.y, block.width, block.height);
 
-    // remove off screen
-    if (block.y > canvas.height) {
-      blocks.splice(i, 1);
-      score++;
-    }
-  });
+      if (isColliding(player, block)) {
+        gameOver = true;
+        if (score > highScore) highScore = score;
+      }
 
-  document.getElementById("score").innerText = "Score: " + score;
+      if (block.y > canvas.height) {
+        blocks.splice(i, 1);
+        score++;
+      }
+    });
+
+    document.getElementById("score").innerText = "Score: " + score;
+    document.getElementById("highscore").innerText = "High Score: " + highScore;
+
+  } else {
+    ctx.fillStyle = "white";
+    ctx.font = "30px Arial";
+    ctx.fillText("GAME OVER", 120, 300);
+  }
 
   requestAnimationFrame(update);
 }
 
-update();
+function restartGame() {
+  startGame();
+}
 
-// Additional script logic...
+startGame();
+update();
