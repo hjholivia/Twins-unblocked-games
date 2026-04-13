@@ -29,42 +29,6 @@
     transition: background-color 0.3s;
 }
 
-.button:hover {
-    background-color: #005f73;
-}
-
-.footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    text-align: center;
-    padding: 10px;
-}
-
-.card {
-    background-color: white;
-    border: 1px solid #dddddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin: 20px;
-    padding: 20px;
-    width: 300px;
-}
-
-.card img {
-    max-width: 100%;
-    height: auto;
-}
-
-.card h3 {
-    margin: 0;
-}
-
-.card p {
-    color: #666;
-}
 body {
   text-align: center;
   background: #111;
@@ -76,5 +40,14 @@ canvas {
   background: black;
   display: block;
   margin: 20px auto;
-  border: 2px solid white;
+  border: 3px solid white;
+  width: 90%;
+  max-width: 400px;
+  height: 600px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 10px;
 }
